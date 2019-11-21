@@ -182,7 +182,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 void ParticleFilter::resample() {
 
   // Resampling according to resampling wheel from the lecture
-  vector<Particle> sampledParticles(num_particles);
+  vector<Particle> sampledParticles;
   
   double beta = 0.0;
   double mw = *std::max_element(weights.begin(), weights.end());  // max. weight
