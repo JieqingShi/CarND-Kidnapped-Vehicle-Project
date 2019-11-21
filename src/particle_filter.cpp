@@ -159,7 +159,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
 
     // compute weights using multivariate Gaussian
-    //particles[i].weight = 1.0;  // todo: does it have to be re-initialized?
+    particles[i].weight = 1.0;
     for(unsigned int t=0; t<transformedObs.size(); t++){
       double x = transformedObs[t].x;
       double y = transformedObs[t].y;
