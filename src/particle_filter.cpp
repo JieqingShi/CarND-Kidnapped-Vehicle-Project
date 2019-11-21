@@ -119,14 +119,14 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
 
   //todo: use dist() from helper_functions to calculate distances:
   //todo: assign the measurement of the closest predicted measurement to the id attrib. of observations
-  for(int i=0; i<observations.size(); ++i){
+  for(unsigned int i=0; i<observations.size(); ++i){
     double obs_x = observations[i].x;
     double obs_y = observations[i].y;
     double distance;
     double min_dist = std::numeric_limits<double>::infinity();
     int nearestId = -1;
 
-    for(int j=0; j<predicted.size(); ++j){
+    for(unsigned int j=0; j<predicted.size(); ++j){
       // double preds_id = predicted[j].id;  // not needed
       double preds_x = predicted[j].x;
       double preds_y = predicted[j].y;
@@ -191,7 +191,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     vector<LandmarkObs> landmarkWithinSensorRange;
 
     // For each particle, consider only landmarks in vicinity of sensor_range
-    for(int j=0; j<map_landmarks.landmark_list.size();++j){  
+    for(unsigned int j=0; j<map_landmarks.landmark_list.size();++j){  
       double xm = map_landmarks.landmark_list[j].x_f;
       double ym = map_landmarks.landmark_list[j].y_f;
       int lm_id = map_landmarks.landmark_list[j].id_i; 
@@ -205,7 +205,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
     // Transform observation coordinates to particles coordinate system
     vector<LandmarkObs> transformedObs;
-    for(int o=0; o<observations.size(); ++o){
+    for(unsigned int o=0; o<observations.size(); ++o){
       int obs_id = observations[o].id;
       double xo = observations[o].x;
       double yo = observations[o].y;
@@ -222,14 +222,14 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
     // compute weights using multivariate Gaussian
     particles[i].weight = 1.0;  // todo: does it have to be re-initialized?
-    for(int t=0; t<transformedObs.size(); ++t){
+    for(unsigned int t=0; t<transformedObs.size(); ++t){
       double x = transformedObs[t].x;
       double y = transformedObs[t].y;
       int associatedLmId = transformedObs[t].id;
 
       // find x and y of nearest landmark
       double mu_x, mu_y;
-      for(int l=0; l<landmarkWithinSensorRange.size(); ++l){
+      for(unsigned int l=0; l<landmarkWithinSensorRange.size(); ++l){
         if(landmarkWithinSensorRange[l].id == associatedLmId){
           mu_x = landmarkWithinSensorRange[l].x;
           mu_y = landmarkWithinSensorRange[l].y;
