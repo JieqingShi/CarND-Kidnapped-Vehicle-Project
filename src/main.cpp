@@ -70,12 +70,17 @@ int main() {
             double sense_theta = std::stod(j[1]["sense_theta"].get<string>());
 
             pf.init(sense_x, sense_y, sense_theta, sigma_pos);
+            /**DEBUG**/
+            std::cout << "Particle filter is initialized: " << pf.initialized() << "\n";
           } else {
             // Predict the vehicle's next state from previous 
             //   (noiseless control) data.
+            /**DEBUG**/
+            std::cout << "Getting control data ... \n";
             double previous_velocity = std::stod(j[1]["previous_velocity"].get<string>());
             double previous_yawrate = std::stod(j[1]["previous_yawrate"].get<string>());
-
+			/**DEBUG**/
+            std::cout << "Starting prediction..." << "\n";
             pf.prediction(delta_t, sigma_pos, previous_velocity, previous_yawrate);
           }
 
@@ -108,7 +113,11 @@ int main() {
           }
 
           // Update the weights and resample
+          /**DEBUG**/
+          std::cout << "Updating weights ...\n";
           pf.updateWeights(sensor_range, sigma_landmark, noisy_observations, map);
+          /**DEBUG**/
+          std::cout << "Resampling ... \n";
           pf.resample();
 
           // Calculate and output the average weighted error of the particle 
