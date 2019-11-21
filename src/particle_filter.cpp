@@ -59,14 +59,6 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
     // weights.push_back(pa.weight);  // not sure if required
   }
   is_initialized = true;  // set flag
-  
-  /** DEBUG **/
-  std::cout << "Initialization finished: \n";
-  for(int i=0; i<num_particles; i++){
-  	std::cout << "particle " << i << ": \t" << particles[i].id << "\t" << particles[i].x << "\t" << particles[i].y << "\n";
-  }
-  std::cout << "Particles size: " << particles.size() << "\n";
-  
 }
 
 void ParticleFilter::prediction(double delta_t, double std_pos[], 
@@ -117,14 +109,6 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
     particles[i].y = y + dist_y(gen);
     particles[i].theta = theta + dist_theta(gen);
     
-    /** DEBUG **/
-    std::cout << "particle " << i << ": \t" << particles[i].id << "\t" << particles[i].x << "\t" << particles[i].y << "\t" << particles[i].theta << "\n";
-  }
-  /** DEBUG **/
-  std::cout << "Prediction: \n";
-  for(int i=0; i<num_particles; ++i){
-  	std::cout << "particle " << i << ": \t" << particles[i].id << "\t" << particles[i].x << "\t" << particles[i].y << "\t" << particles[i].theta << "\n";
-  }
 }
 
 void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted, 
@@ -142,7 +126,6 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
   //todo: assign the measurement of the closest predicted measurement to the id attrib. of observations
   
   for(unsigned int i=0; i<observations.size(); i++){
-    std::cout << "Looking for landmarks to associate to observation " << i <<"\n";
     double obs_x = observations[i].x;
     double obs_y = observations[i].y;
     double distance;
@@ -157,15 +140,13 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
       if(distance < min_dist){
         min_dist = distance;
         nearestId = predicted[j].id;  // or is it j?
-        /**DEBUG**/
-        std::cout<<"Updated min_distance for obs. " << i << " \t newest associated landmark = " << predicted[j].id << " and distance = " << min_dist << "\n";
       }
     }
     observations[i].id = nearestId;
   }
 }
 
-/*
+
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
                                    const vector<LandmarkObs> &observations, 
                                    const Map &map_landmarks) {
@@ -198,8 +179,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   // int lm_id;
 
   for(int i=0; i<num_particles; i++){
-    
-    std::cout<<"Updating weights for particle " << i << "\n";
+   
     double xp = particles[i].x;
     double yp = particles[i].y;
     double thetap = particles[i].theta;
@@ -217,9 +197,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         landmarkWithinSensorRange.push_back(LandmarkObs{lm_id, xm, ym});
       }
     }
-    
-    std::cout<<"Found  " << landmarkWithinSensorRange.size() << "landmarks within sensor range of particle " << i << "\n";
-
     // Transform observation coordinates to particles coordinate system
     vector<LandmarkObs> transformedObs;
     for(unsigned int o=0; o<observations.size(); o++){
@@ -233,47 +210,36 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       transformedObs.push_back(LandmarkObs{obs_id, xt, yt});
     }
     
-    std::cout<<"Transformed " << observations.size() << " obs. to map coordinates. New vector contains " << transformedObs.size() << " elements \n";
-
-
     // Associate transformed observations to nearest landmark
     dataAssociation(landmarkWithinSensorRange, transformedObs);
-    std::cout <<"Successfully associated landmarks to nearest observations\n";
 
 
     // compute weights using multivariate Gaussian
-    std::cout <<"Weight of particle " << i << " = " << particles[i].weight << "\n";
     particles[i].weight = 1.0;  // todo: does it have to be re-initialized?
-    std::cout <<"Computing weights of particles using mv gaussian \n";
     for(unsigned int t=0; t<transformedObs.size(); t++){
       double x = transformedObs[t].x;
       double y = transformedObs[t].y;
       int associatedLmId = transformedObs[t].id;
-      std::cout <<"For transformed obs with id" << associatedLmId << " the coordinates are: " << "\t x: " << x << "\t y: " << y << "\n";
       
 
       // find x and y of nearest landmark
-      std::cout <<"Finding the id of the nearest landmark\n";
       double mu_x, mu_y;
       for(unsigned int l=0; l<landmarkWithinSensorRange.size(); ++l){
         if(landmarkWithinSensorRange[l].id == associatedLmId){
           mu_x = landmarkWithinSensorRange[l].x;
           mu_y = landmarkWithinSensorRange[l].y;
-          std::cout<<"Found nearest landmark, it has id: "<<landmarkWithinSensorRange[l].id << "\t x: " << mu_x << "\t y: " << mu_y << "\n";
           //break;
         }
       }
 
       double weight_obs = multiv_prob(std_ldm_x, std_ldm_y, x, y, mu_x, mu_y);
-      std::cout<<"Calculated weight for this obs: "<<weight_obs<<"\n";
       particles[i].weight *= weight_obs;
-      std::cout<<"Calculated weight of particle: "<<particles[i].weight<<"\n";
       //weights[i] = particles[i].weight;  // use this vector for the resampling step
       //std::cout<<"Also storing the weight in the weights vector: " <<weights[i]<<"\n";
     }
   }
 }
-*/
+
   
 
 /*
@@ -308,19 +274,11 @@ void ParticleFilter::resample() {
   particles = sampledParticles;
 }
 */
+  
+/*
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
-    std::vector<LandmarkObs> observations, Map map_landmarks) {
-  // TODO: Update the weights of each particle using a mult-variate Gaussian distribution. You can read
-  //   more about this distribution here: https://en.wikipedia.org/wiki/Multivariate_normal_distribution
-  // NOTE: The observations are given in the VEHICLE'S coordinate system. Your particles are located
-  //   according to the MAP'S coordinate system. You will need to transform between the two systems.
-  //   Keep in mind that this transformation requires both rotation AND translation (but no scaling).
-  //   The following is a good resource for the theory:
-  //   https://www.willamette.edu/~gorr/classes/GeneralGraphics/Transforms/transforms2d.htm
-  //   and the following is a good resource for the actual equation to implement (look at equation 
-  //   3.33. Note that you'll need to switch the minus sign in that equation to a plus to account 
-  //   for the fact that the map's y-axis actually points downwards.)
-  //   http://planning.cs.uiuc.edu/node99.html
+                                   const vector<LandmarkObs> &observations, 
+                                   const Map &map_landmarks) {
 
   // for each particle...
   for (int i = 0; i < num_particles; i++) {
@@ -391,6 +349,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     }
   }
 }
+*/
 
 void ParticleFilter::resample() {
   // TODO: Resample particles with replacement with probability proportional to their weight. 
@@ -410,7 +369,7 @@ void ParticleFilter::resample() {
   auto index = uniintdist(gen);
 
   // get max weight
-  double max_weight = *max_element(weights.begin(), weights.end());
+  double max_weight = *std::max_element(weights.begin(), weights.end());
 
   // uniform random distribution [0.0, max_weight)
   std::uniform_real_distribution<double> unirealdist(0.0, max_weight);
