@@ -172,8 +172,9 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         }
       }
 
+      // calculate weights as probabilities
       double weight_obs = multiv_prob(std_ldm_x, std_ldm_y, x, y, mu_x, mu_y);  // inline function defined in particles.h
-      particles[i].weight *= weight_obs;
+      particles[i].weight *= weight_obs;  //calculate final weight of particle (product of all observation weights)
       weights[i] = particles[i].weight;  // use this vector for the resampling step
     }
   }
@@ -187,7 +188,7 @@ void ParticleFilter::resample() {
   double beta = 0.0;
   double mw = *std::max_element(weights.begin(), weights.end());  // max. weight
   std::uniform_real_distribution<double> distribution(0.0, mw);
-  std::uniform_int_distribution<int> int_distribution(0.0, num_particles-1);
+  std::uniform_int_distribution<int> int_distribution(0, num_particles-1);
 
   int index = int_distribution(gen);
   for(int i=0; i<num_particles; i++){
